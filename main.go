@@ -1,21 +1,30 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
 )
 
-type task struct {
-	Message string
-}
+var task string
 
-func GetHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, Go!")
+type requestBody struct {
+	Message string `json:"message"`
 }
 
 func PostHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, task{Message: "Hello task"})
+	var request requestBody
+
+	json.NewDecoder(r.Body).Decode(&request)
+
+	task = request.Message
+	fmt.Fprintf(w, "Task %s", task)
+}
+
+func GetHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello, Go!\n")
+	fmt.Fprintf(w, "Your task is %s!", task)
 }
 
 func main() {
