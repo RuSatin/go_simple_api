@@ -10,16 +10,21 @@ import (
 var task string
 
 type requestBody struct {
+	ID      uint   `gorm:"primarykey"`
 	Message string `json:"message"`
 }
 
 func PostHandler(w http.ResponseWriter, r *http.Request) {
 	var request requestBody
-
 	json.NewDecoder(r.Body).Decode(&request)
 
-	task = request.Message
-	fmt.Fprintf(w, "Task %s", task)
+	message := Message{
+		Task:   request.Message,
+		IsDone: false, // по умолчанию задача не выполнена
+	}
+
+	DB.Create(&message)
+
 }
 
 func GetHandler(w http.ResponseWriter, r *http.Request) {
@@ -28,6 +33,10 @@ func GetHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	InitDB()
+	DB.Create(task)
+	DB.AutoMigrate(&Message{})
+
 	router := mux.NewRouter()
 	router.HandleFunc("/api/hello", GetHandler).Methods("GET")
 	router.HandleFunc("/api/task", PostHandler).Methods("POST")
