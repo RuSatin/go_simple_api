@@ -43,7 +43,7 @@ func main() {
 	DB.AutoMigrate(&Message{})
 
 	router := mux.NewRouter()
-	router.HandleFunc("/api/hello", GetHandler).Methods("GET")
-	router.HandleFunc("/api/task", PostHandler).Methods("POST")
+	router.HandleFunc("/api/all_tasks", GetHandler).Methods("GET")
+	router.HandleFunc("/api/new_task", PostHandler).Methods("POST")
 	http.ListenAndServe("localhost:8080", router)
 }
