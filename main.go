@@ -20,7 +20,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 
 	message := Message{
 		Task:   request.Message,
-		IsDone: false, // по умолчанию задача не выполнена
+		IsDone: true, // по умолчанию задача не выполнена
 	}
 
 	DB.Create(&message)
@@ -28,8 +28,13 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, Go!\n")
-	fmt.Fprintf(w, "Your task is %s!", task)
+	var messages []Message
+	DB.Find(&messages)
+	for _, message := range messages {
+		fmt.Fprintf(
+			w, "ID: %d, CreatedAt: %s, Task: %s, Is Done: %t\n",
+			message.ID, message.CreatedAt, message.Task, message.IsDone)
+	}
 }
 
 func main() {
