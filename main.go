@@ -7,8 +7,6 @@ import (
 	"net/http"
 )
 
-var task string
-
 type requestBody struct {
 	ID      uint   `gorm:"primarykey"`
 	Message string `json:"message"`
@@ -24,12 +22,14 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	DB.Create(&message)
+	json.NewEncoder(w).Encode(message)
 
 }
 
 func GetHandler(w http.ResponseWriter, r *http.Request) {
 	var messages []Message
 	DB.Find(&messages)
+	json.NewEncoder(w).Encode(messages)
 	for _, message := range messages {
 		fmt.Fprintf(
 			w, "ID: %d, CreatedAt: %s, Task: %s, Is Done: %t\n",
@@ -39,9 +39,7 @@ func GetHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	InitDB()
-	DB.Create(task)
 	DB.AutoMigrate(&Message{})
-
 	router := mux.NewRouter()
 	router.HandleFunc("/api/all_tasks", GetHandler).Methods("GET")
 	router.HandleFunc("/api/new_task", PostHandler).Methods("POST")
