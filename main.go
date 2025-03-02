@@ -9,27 +9,34 @@ import (
 
 var task string
 
-type requestBody struct {
-	Message string `json:"message"`
+func GetHandler(w http.ResponseWriter, r *http.Request) {
+	if task == "" {
+		fmt.Fprintln(w, "Hello, World!")
+	} else {
+		fmt.Fprintf(w, "Hello, %s!\n", task)
+	}
 }
 
 func PostHandler(w http.ResponseWriter, r *http.Request) {
-	var request requestBody
+	var request struct {
+		Task string `json:"task"`
+	}
 
-	json.NewDecoder(r.Body).Decode(&request)
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
 
-	task = request.Message
-	fmt.Fprintf(w, "Task %s", task)
-}
+	task = request.Task
 
-func GetHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, Go!\n")
-	fmt.Fprintf(w, "Your task is %s!", task)
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, "Task updated successfully")
 }
 
 func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/hello", GetHandler).Methods("GET")
 	router.HandleFunc("/api/task", PostHandler).Methods("POST")
-	http.ListenAndServe("localhost:8080", router)
+	http.ListenAndServe(":8080", router)
 }
