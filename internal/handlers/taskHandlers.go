@@ -11,8 +11,27 @@ type Handler struct {
 }
 
 func (h *Handler) GetTasks(ctx context.Context, request tasks.GetTasksRequestObject) (tasks.GetTasksResponseObject, error) {
-	//TODO implement me
-	panic("implement me")
+	// Получаем все задачи из сервиса
+	allTasks, err := h.Service.GetAllTasks()
+	if err != nil {
+		return nil, err // Возвращаем ошибку, если что-то пошло не так
+	}
+
+	// Создаем слайс для ответа
+	response := tasks.GetTasks200JSONResponse{}
+
+	// Преобразуем задачи из базы данных в формат, ожидаемый клиентом
+	for _, tsk := range allTasks {
+		task := tasks.Task{
+			Id:     &tsk.ID,
+			Task:   &tsk.Task,
+			IsDone: &tsk.IsDone,
+		}
+		response = append(response, task)
+	}
+
+	// Возвращаем ответ
+	return response, nil
 }
 
 func (h *Handler) PostTasks(ctx context.Context, request tasks.PostTasksRequestObject) (tasks.PostTasksResponseObject, error) {
